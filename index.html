@@ -139,6 +139,11 @@
 
     .dropdown-item:hover { color: var(--ink); }
 
+    /* ═══════ SUB-NAV (mobile journal filter) ═══════ */
+    .sub-nav-row {
+      display: none;
+    }
+
     /* ═══════ CONTENT ═══════ */
     .content-area {
       padding: 40px 48px 80px;
@@ -352,6 +357,50 @@
         font-size: 9.5px;
       }
 
+      /* Hide dropdown on mobile, use sub-nav instead */
+      .dropdown { display: none !important; }
+
+      .sub-nav-row {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 8px 0 0;
+      }
+
+      .sub-nav-row:empty { display: none; padding: 0; }
+
+      .sub-nav-row::-webkit-scrollbar { display: none; }
+
+      .sub-nav-item {
+        padding: 6px 14px 10px;
+        font-size: 9.5px;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--faint);
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: inherit;
+        white-space: nowrap;
+        position: relative;
+        transition: color 0.15s;
+      }
+
+      .sub-nav-item:hover, .sub-nav-item.active { color: var(--ink); }
+
+      .sub-nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 14px;
+        right: 14px;
+        height: 1.5px;
+        background: var(--ink);
+      }
+
       /* Detail panel full width on mobile */
       .detail-panel {
         width: 100%;
@@ -367,23 +416,6 @@
         font-size: 16px;
       }
 
-      .dropdown {
-        position: fixed;
-        top: 90px;
-        left: 16px;
-        right: 16px;
-        transform: none;
-        min-width: auto;
-        width: auto;
-        max-width: calc(100vw - 32px);
-        z-index: 1000;
-        border: 1px solid var(--line);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-      }
-
-      .top-bar {
-        z-index: 300;
-      }
     }
 
     /* ═══════ RESPONSIVE - SMALL PHONE ═══════ */
@@ -561,6 +593,7 @@
   <div class="top-bar">
     <div class="brand">Scholar Browse</div>
     <div class="nav-row" id="nav-row"></div>
+    <div class="sub-nav-row" id="sub-nav-row"></div>
   </div>
 
   <!-- ═══════ CONTENT ═══════ -->
@@ -649,28 +682,17 @@
 
         const btn = document.createElement("button");
         btn.className = "nav-item" + (activeCategory === cat.id && !activeJournal ? " active" : "");
+        if (activeJournal && activeCategory === cat.id) btn.classList.add("active");
         btn.textContent = cat.name;
-        btn.onclick = (e) => {
-          // On touch devices, if this category has journals, toggle dropdown first
-          if (cat.journals.length > 0 && 'ontouchstart' in window) {
-            const dd = group.querySelector('.dropdown');
-            const isOpen = dd && dd.classList.contains('open');
-            // Close all dropdowns first
-            document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
-            if (!isOpen && dd) {
-              dd.classList.add('open');
-              e.stopPropagation();
-              return;
-            }
-          }
+        btn.onclick = () => {
           activeCategory = cat.id;
           activeJournal = null;
-          document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
           buildNav();
           renderArticles();
         };
         group.appendChild(btn);
 
+        // Desktop dropdown (hidden on mobile via CSS)
         if (cat.journals.length > 0) {
           const dd = document.createElement("div");
           dd.className = "dropdown";
@@ -694,6 +716,41 @@
         }
 
         navRow.appendChild(group);
+      });
+
+      // Build sub-nav for mobile (journal filter row)
+      buildSubNav();
+    }
+
+    function buildSubNav() {
+      const subNav = document.getElementById("sub-nav-row");
+      subNav.innerHTML = "";
+
+      const activeCat = CATEGORIES.find(c => c.id === activeCategory);
+      if (!activeCat || activeCat.journals.length <= 1) return;
+
+      // "All" button
+      const allBtn = document.createElement("button");
+      allBtn.className = "sub-nav-item" + (!activeJournal ? " active" : "");
+      allBtn.textContent = "All";
+      allBtn.onclick = () => {
+        activeJournal = null;
+        buildNav();
+        renderArticles();
+      };
+      subNav.appendChild(allBtn);
+
+      // Individual journal buttons
+      activeCat.journals.forEach(j => {
+        const btn = document.createElement("button");
+        btn.className = "sub-nav-item" + (activeJournal === j ? " active" : "");
+        btn.textContent = j;
+        btn.onclick = () => {
+          activeJournal = j;
+          buildNav();
+          renderArticles();
+        };
+        subNav.appendChild(btn);
       });
     }
 
@@ -784,13 +841,6 @@
     // Close on ESC
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") closeDetail();
-    });
-
-    // Close dropdowns when tapping outside
-    document.addEventListener("click", (e) => {
-      if (!e.target.closest('.nav-group')) {
-        document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
-      }
     });
 
     // ─── INIT ─────────────────────────────────────────────────────
