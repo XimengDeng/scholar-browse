@@ -1,0 +1,60 @@
+{
+  "retention_months": 4,
+  "openai_model": "gpt-4o-mini",
+  "categories": [
+    {
+      "id": "info-science",
+      "name": "Information Science",
+      "journals": [
+        {
+          "name": "JASIST",
+          "full_name": "Journal of the Association for Information Science and Technology",
+          "rss_url": "https://asistdl.onlinelibrary.wiley.com/feed/23301643/most-recent",
+          "color": "#3B4F5C"
+        }
+      ]
+    },
+    {
+      "id": "doc-open-data",
+      "name": "Documentation & Open Data",
+      "journals": [
+        {
+          "name": "J. of Documentation",
+          "full_name": "Journal of Documentation",
+          "rss_url": "https://www.emerald.com/rss/site_1000445/1000226.xml",
+          "color": "#5C6B5A"
+        },
+        {
+          "name": "JOHD",
+          "full_name": "Journal of Open Humanities Data",
+          "rss_url": "https://reference-global.com/2/rss/journal/UPJJOHD",
+          "color": "#8C6D4F"
+        }
+      ]
+    },
+    {
+      "id": "digital-humanities",
+      "name": "Digital Humanities",
+      "journals": [
+        {
+          "name": "DHQ",
+          "full_name": "Digital Humanities Quarterly",
+          "rss_url": "https://dhq.digitalhumanities.org/feed/news.xml",
+          "color": "#4A3F5C"
+        },
+        {
+          "name": "DSH",
+          "full_name": "Digital Scholarship in the Humanities",
+          "rss_url": "https://academic.oup.com/rss/site_5447/3308.xml",
+          "color": "#6B4C3B"
+        },
+        {
+          "name": "CHR",
+          "full_name": "Computational Humanities Research",
+          "rss_url": "https://www.cambridge.org/core/rss/product/id/9136A3CAA620A84558957E9EF5272548",
+          "color": "#2D2926"
+        }
+      ]
+    }
+  ]
+}
