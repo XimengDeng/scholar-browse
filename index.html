@@ -36,6 +36,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      overflow: visible;
     }
 
     .brand {
@@ -105,7 +106,13 @@
       z-index: 200;
     }
 
-    .nav-group:hover .dropdown { display: flex; }
+    /* Desktop: hover to open */
+    @media (hover: hover) {
+      .nav-group:hover .dropdown { display: flex; }
+    }
+
+    /* Touch / click: open class */
+    .dropdown.open { display: flex; }
 
     .dropdown-label {
       font-size: 10px;
@@ -286,6 +293,7 @@
       .nav-row {
         gap: 0;
         overflow-x: auto;
+        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
       }
@@ -360,7 +368,21 @@
       }
 
       .dropdown {
-        min-width: 200px;
+        position: fixed;
+        top: 90px;
+        left: 16px;
+        right: 16px;
+        transform: none;
+        min-width: auto;
+        width: auto;
+        max-width: calc(100vw - 32px);
+        z-index: 1000;
+        border: 1px solid var(--line);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      }
+
+      .top-bar {
+        z-index: 300;
       }
     }
 
@@ -628,9 +650,22 @@
         const btn = document.createElement("button");
         btn.className = "nav-item" + (activeCategory === cat.id && !activeJournal ? " active" : "");
         btn.textContent = cat.name;
-        btn.onclick = () => {
+        btn.onclick = (e) => {
+          // On touch devices, if this category has journals, toggle dropdown first
+          if (cat.journals.length > 0 && 'ontouchstart' in window) {
+            const dd = group.querySelector('.dropdown');
+            const isOpen = dd && dd.classList.contains('open');
+            // Close all dropdowns first
+            document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+            if (!isOpen && dd) {
+              dd.classList.add('open');
+              e.stopPropagation();
+              return;
+            }
+          }
           activeCategory = cat.id;
           activeJournal = null;
+          document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
           buildNav();
           renderArticles();
         };
@@ -749,6 +784,13 @@
     // Close on ESC
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") closeDetail();
+    });
+
+    // Close dropdowns when tapping outside
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest('.nav-group')) {
+        document.querySelectorAll('.dropdown.open').forEach(d => d.classList.remove('open'));
+      }
     });
 
     // ─── INIT ─────────────────────────────────────────────────────
